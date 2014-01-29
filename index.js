@@ -1,15 +1,15 @@
 var is = require( "sc-is" ),
   noop = function () {};
 
-var use = function ( _object ) {
-  var self, obj = _object;
+var use = function ( _objectOrFunction ) {
+  var self, obj = _objectOrFunction;
 
   self = function ( _function ) {
     self.functions.push( _function );
     return self.obj;
   };
 
-  self.obj = _object;
+  self.obj = _objectOrFunction.prototype || _objectOrFunction;
   self.clear = function () {
     self.functions = [];
   }
@@ -47,15 +47,15 @@ var run = function () {
 
 }
 
-var Useify = function ( _object ) {
+var Useify = function ( _objectOrFunction ) {
 
-  if ( is.object( _object ) === false ) {
-    throw new Error( "A function or an object is required" );
+  if ( is.object( _objectOrFunction ) ) {
+    Object.defineProperty( _objectOrFunction, "use", {
+      value: use( _objectOrFunction )
+    } );
+  } else if ( is.fn( _objectOrFunction ) ) {
+    _objectOrFunction.prototype.use = use( _objectOrFunction );
   }
-
-  Object.defineProperty( _object, "use", {
-    value: use( _object )
-  } );
 
 };
 

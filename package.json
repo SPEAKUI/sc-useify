@@ -1,0 +1,17 @@
+{
+  "name": "sc-useify",
+  "version": "0.0.4",
+  "description": "`Useify` is a middleware implementation that extends objects",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "David Tsuji",
+  "license": "MIT",
+  "devDependencies": {
+    "should": "~3.0.1"
+  },
+  "dependencies": {
+    "sc-is": "0.0.x"
+  }
+}

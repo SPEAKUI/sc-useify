@@ -54,7 +54,7 @@ var Useify = function ( _objectOrFunction ) {
       value: use( _objectOrFunction )
     } );
   } else if ( is.fn( _objectOrFunction ) ) {
-    _objectOrFunction.prototype.use = use( _objectOrFunction );
+    _objectOrFunction.prototype.use = _objectOrFunction.use = use( _objectOrFunction );
   }
 
 };

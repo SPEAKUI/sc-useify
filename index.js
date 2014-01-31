@@ -1,62 +1,87 @@
 var is = require( "sc-is" ),
   noop = function () {};
 
-var use = function ( _objectOrFunction ) {
-  var self, obj = _objectOrFunction;
-
-  self = function ( _function ) {
-    self.functions.push( _function );
-    return self.obj;
-  };
-
-  self.obj = _objectOrFunction.prototype || _objectOrFunction;
-  self.clear = function () {
-    self.functions = [];
-  }
-  self.run = function () {
-    run.apply( self, arguments );
-  };
-
-  self.clear();
-
-  return self;
+var Useify = function () {
+  this.functions = [];
 };
 
-var run = function () {
+Useify.prototype.use = function ( fn ) {
+  if ( is.a.fn( fn ) ) {
+    this.functions.push( fn );
+  }
+};
+
+Useify.prototype.run = function () {
+
   var self = this,
     currentFunction = 0,
     args = Array.prototype.slice.call( arguments ),
     callback = args[ args.length - 1 ];
 
-  callback = is.fn( callback ) ? args.pop() : noop;
+  callback = is.a.func( callback ) ? args.pop() : noop;
 
   var next = function () {
     var fn = self.functions[ currentFunction++ ],
       args = Array.prototype.slice.call( arguments );
 
     if ( !fn ) {
-      callback.apply( self.obj, args );
+      callback.apply( self.context, args );
     } else {
       args.push( next );
-      fn.apply( self.obj, args );
+      fn.apply( self.context, args );
     }
 
   };
 
-  next.apply( self.obj, args );
-
-}
-
-var Useify = function ( _objectOrFunction ) {
-
-  if ( is.object( _objectOrFunction ) ) {
-    Object.defineProperty( _objectOrFunction, "use", {
-      value: use( _objectOrFunction )
-    } );
-  } else if ( is.fn( _objectOrFunction ) ) {
-    _objectOrFunction.prototype.use = _objectOrFunction.use = use( _objectOrFunction );
-  }
+  next.apply( self.context, args );
 
 };
 
-module.exports = Useify;
+Useify.prototype.clear = function () {
+  this.functions = [];
+};
+
+module.exports = function ( _objectOrFunction ) {
+
+  var useify = new Useify();
+
+  if ( is.an.object( _objectOrFunction ) ) {
+
+    Object.defineProperties( _objectOrFunction, {
+
+      "use": {
+        value: function () {
+          useify.use.apply( useify, arguments );
+          return _objectOrFunction;
+        }
+      },
+
+      "middleware": {
+        value: function () {
+          useify.run.apply( useify, arguments );
+        }
+      },
+
+      "useify": {
+        value: useify
+      }
+
+    } );
+
+    useify.context = _objectOrFunction;
+
+  } else if ( is.a.fn( _objectOrFunction ) ) {
+
+    _objectOrFunction.prototype.middleware = function () {
+      useify.context = this;
+      useify.run.apply( useify, arguments );
+    };
+
+    _objectOrFunction.use = function () {
+      useify.use.apply( useify, arguments );
+      return this;
+    };
+
+  }
+
+};

@@ -18,34 +18,36 @@ describe( "sg-useify", function () {
     it( "should handle more than 1 object in the same context", function ( _done ) {
 
       var class1 = {
+        name: "class1",
         numUses: 0,
         doStuff: function ( _callback ) {
-          var self = this;
-          this.use.run.should.exist;
-          this.use.functions.should.have.a.lengthOf( 3 );
-          this.should.have.a.property( "numUses", 0 );
-          this.use.run( function () {
+          var self = class1;
+          self.useify.should.exist;
+          self.useify.functions.should.have.a.lengthOf( 3 );
+          self.should.have.a.property( "numUses", 0 );
+          self.middleware( function () {
             self.should.have.a.property( "numUses", 3 );
             _callback();
           } );
         }
-      }
+      };
 
       var class2 = {
+        name: "class2",
         numUses: 0,
         doStuff: function () {
-          var self = this;
-          this.use.run.should.exist;
-          this.use.functions.should.have.a.lengthOf( 2 );
-          this.should.have.a.property( "numUses", 0 );
-          this.use.run( function () {
+          var self = class2;
+          self.useify.should.exist;
+          self.useify.functions.should.have.a.lengthOf( 2 );
+          self.should.have.a.property( "numUses", 0 );
+          self.middleware( function () {
 
             self.should.have.a.property( "numUses", 2 );
             _done();
 
           } );
         }
-      }
+      };
 
       Useify( class1 );
       Useify( class2 );
@@ -88,7 +90,7 @@ describe( "sg-useify", function () {
       var aClass = {
         doStuff: function () {
 
-          this.use.run( function ( _error, _res ) {
+          aClass.middleware( function ( _error, _res ) {
 
             _done();
 
@@ -138,7 +140,7 @@ describe( "sg-useify", function () {
 
       } );
 
-      aClass.use.run( "one", "two" );
+      aClass.middleware( "one", "two" );
 
     } );
 
@@ -154,7 +156,7 @@ describe( "sg-useify", function () {
         _next( _counter + 2 );
       } ).use( function ( _counter, _next ) {
         _next( _counter + 3 );
-      } ).use.run( function ( _counter ) {
+      } ).middleware( function ( _counter ) {
         should( _counter ).equal( 6 );
         _done();
       } );
@@ -170,15 +172,15 @@ describe( "sg-useify", function () {
       Useify( aClass );
 
       aClass.use( function ( _next ) {
-        this.should.have.a.property( "one", "one" );
-        this.two = "two";
+        aClass.should.have.a.property( "one", "one" );
+        aClass.two = "two";
         _next();
       } ).use( function ( _next ) {
-        this.should.have.a.property( "two", "two" );
-        this.three = "three";
+        aClass.should.have.a.property( "two", "two" );
+        aClass.three = "three";
         _next();
-      } ).use.run( function () {
-        this.should.have.a.property( "three", "three" );
+      } ).middleware( function () {
+        aClass.should.have.a.property( "three", "three" );
         _done();
       } );
 
@@ -196,7 +198,7 @@ describe( "sg-useify", function () {
         _next( 2 );
       } ).use( function ( _counter, _next ) {
         _next();
-      } ).use.run( function () {
+      } ).middleware( function () {
         arguments.should.have.a.lengthOf( 0 );
 
         var bClass = {};
@@ -209,7 +211,7 @@ describe( "sg-useify", function () {
           _next( 2 );
         } ).use( function ( _counter, _next ) {
           _next( 1, 2, 3 );
-        } ).use.run( function () {
+        } ).middleware( function () {
           arguments.should.have.a.lengthOf( 3 );
           _done();
         } );
@@ -223,7 +225,7 @@ describe( "sg-useify", function () {
 
       Useify( aClass );
 
-      aClass.use.run( function () {
+      aClass.middleware( function () {
         _done();
       } );
 
@@ -237,9 +239,9 @@ describe( "sg-useify", function () {
 
       aClass.use( function () {} ).use( function () {} ).use( function () {} );
 
-      aClass.use.functions.should.have.a.lengthOf( 3 );
-      aClass.use.clear();
-      aClass.use.functions.should.have.a.lengthOf( 0 );
+      aClass.useify.functions.should.have.a.lengthOf( 3 );
+      aClass.useify.clear();
+      aClass.useify.functions.should.have.a.lengthOf( 0 );
 
     } );
 
@@ -260,8 +262,8 @@ describe( "sg-useify", function () {
         _next();
       } );
 
-      aClass.use.run( function () {
-        aClass.use.run( function () {
+      aClass.middleware( function () {
+        aClass.middleware( function () {
           should( counter ).equal( 4 );
           _done();
         } );
@@ -280,19 +282,19 @@ describe( "sg-useify", function () {
 
       Useify( MyClass );
 
-      MyClass.prototype.should.have.a.property( "use" );
+      MyClass.should.have.a.property( "use" );
       myClass = new MyClass();
-      myClass.should.have.a.property( "use" );
+      myClass.should.have.a.property( "middleware" );
 
     } );
 
-    it( "should add `use` to the prototype", function ( _done ) {
+    it( "should add `use` to the class definition and `useify` to the prototype", function ( _done ) {
 
       var myClass;
 
       var MyClass = function () {
 
-        this.use.run( function () {
+        this.middleware( function () {
           this.counter.should.equal( 2 );
           _done();
         } );
@@ -303,17 +305,58 @@ describe( "sg-useify", function () {
 
       Useify( MyClass );
 
-      MyClass.prototype.use( function ( _next ) {
+      MyClass.use( function ( _next ) {
         this.counter++;
         _next();
       } );
 
-      MyClass.prototype.use( function ( _next ) {
+      MyClass.use( function ( _next ) {
         this.counter++;
         _next();
       } );
 
       myClass = new MyClass();
+
+    } );
+
+    it( "should ensure the correct context is passed to the middleware functions", function ( _done ) {
+
+      var MyClass = function ( options ) {
+
+        this.options = options;
+
+      };
+
+      MyClass.prototype.execute = function () {
+
+        var self = this;
+
+        this.middleware( function () {
+          self.options.should.have.a.property( "isTrue", null );
+          _done();
+        } );
+
+      };
+
+      Useify( MyClass );
+
+      MyClass.use( function ( _next ) {
+        this.options.isTrue.should.be.true;
+        this.options.isTrue = false;
+        _next();
+      } );
+
+      MyClass.use( function ( _next ) {
+        this.options.isTrue.should.be.false;
+        this.options.isTrue = null;
+        _next();
+      } );
+
+      myClass = new MyClass( {
+        isTrue: true
+      } );
+
+      myClass.execute();
 
     } );
 
@@ -335,7 +378,7 @@ describe( "sg-useify", function () {
     myClass.use( function ( _one, _two, _next ) {
 
       // The context `this` is a reference to the context class. In this example it is `myClass`
-      var aValue = this.value + _one + _two;
+      var aValue = myClass.value + _one + _two;
 
       // Trigger the callback when this functions tasks are complete. Pass a dynmaic amount of
       // arguments to the next function.
@@ -358,7 +401,7 @@ describe( "sg-useify", function () {
 
     // Runs the middleware queue of functions. The last argument of `run` is a callback that is 
     // triggered after the queue is emptied.
-    myClass.use.run( 1, 2, function ( _sum ) {
+    myClass.middleware( 1, 2, function ( _sum ) {
 
       should( _sum ).equal( 12 );
       _done();

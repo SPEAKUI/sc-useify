@@ -6,7 +6,7 @@
 ## Example
 
 ```javascript
-// var Useify = require( "sc-useify" ),
+// var Useify = require( "Useify" ),
 //   should = require( "should" );
 
 var myClass = {
@@ -20,7 +20,7 @@ Useify( myClass );
 myClass.use( function ( _one, _two, _next ) {
 
   // The context `this` is a reference to the context class. In this example it is `myClass`
-  var aValue = this.value + _one + _two;
+  var aValue = myClass.value + _one + _two;
 
   // Trigger the callback when this functions tasks are complete. Pass a dynmaic amount of
   // arguments to the next function.
@@ -43,7 +43,7 @@ myClass.use( function ( _three, _next ) {
 
 // Runs the middleware queue of functions. The last argument of `run` is a callback that is 
 // triggered after the queue is emptied.
-myClass.use.run( 1, 2, function ( _sum ) {
+myClass.middleware( 1, 2, function ( _sum ) {
 
   should( _sum ).equal( 12 );
   _done();

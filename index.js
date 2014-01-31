@@ -1,14 +1,30 @@
 var is = require( "sc-is" ),
+  config = require( "./config.json" )
   noop = function () {};
 
+var useifyFunction = function ( functions, key, fn ) {
+  if ( is.not.an.array( functions[ key ] ) ) {
+    functions[ key ] = [];
+  }
+  if ( is.a.func( fn ) ) {
+    functions[ key ].push( fn );
+  }
+  return functions[ key ];
+}
+
 var Useify = function () {
-  this.functions = [];
+  this.functions = {
+    all: []
+  };
 };
 
-Useify.prototype.use = function ( fn ) {
-  if ( is.a.fn( fn ) ) {
-    this.functions.push( fn );
-  }
+Useify.prototype.use = function () {
+  var self = this,
+    args = Array.prototype.slice.call( arguments ),
+    key = is.a.string( args[ 0 ] ) ? args.shift() : config.defaults.middlewareKey,
+    fn = is.a.func( args[ 0 ] ) ? args.shift() : noop;
+
+  useifyFunction( self.functions, key, fn );
 };
 
 Useify.prototype.run = function () {
@@ -16,12 +32,13 @@ Useify.prototype.run = function () {
   var self = this,
     currentFunction = 0,
     args = Array.prototype.slice.call( arguments ),
+    middlewareKey = self.functions[ args[ 0 ] ] ? args.shift() : config.defaults.middlewareKey
     callback = args[ args.length - 1 ];
 
   callback = is.a.func( callback ) ? args.pop() : noop;
 
   var next = function () {
-    var fn = self.functions[ currentFunction++ ],
+    var fn = self.functions[ middlewareKey ][ currentFunction++ ],
       args = Array.prototype.slice.call( arguments );
 
     if ( !fn ) {
@@ -37,8 +54,8 @@ Useify.prototype.run = function () {
 
 };
 
-Useify.prototype.clear = function () {
-  this.functions = [];
+Useify.prototype.clear = function ( middlewareKey ) {
+  this.functions[ middlewareKey || config.defaults.middlewareKey ] = [];
 };
 
 module.exports = function ( _objectOrFunction ) {

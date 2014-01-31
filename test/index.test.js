@@ -23,7 +23,7 @@ describe( "sg-useify", function () {
         doStuff: function ( _callback ) {
           var self = class1;
           self.useify.should.exist;
-          self.useify.functions.should.have.a.lengthOf( 3 );
+          self.useify.functions.all.should.have.a.lengthOf( 3 );
           self.should.have.a.property( "numUses", 0 );
           self.middleware( function () {
             self.should.have.a.property( "numUses", 3 );
@@ -38,7 +38,7 @@ describe( "sg-useify", function () {
         doStuff: function () {
           var self = class2;
           self.useify.should.exist;
-          self.useify.functions.should.have.a.lengthOf( 2 );
+          self.useify.functions.all.should.have.a.lengthOf( 2 );
           self.should.have.a.property( "numUses", 0 );
           self.middleware( function () {
 
@@ -239,9 +239,9 @@ describe( "sg-useify", function () {
 
       aClass.use( function () {} ).use( function () {} ).use( function () {} );
 
-      aClass.useify.functions.should.have.a.lengthOf( 3 );
+      aClass.useify.functions.all.should.have.a.lengthOf( 3 );
       aClass.useify.clear();
-      aClass.useify.functions.should.have.a.lengthOf( 0 );
+      aClass.useify.functions.all.should.have.a.lengthOf( 0 );
 
     } );
 
@@ -356,8 +356,69 @@ describe( "sg-useify", function () {
         isTrue: true
       } );
 
-      MyClass.useify.functions.should.be.an.instanceof( Array ).and.have.a.lengthOf( 2 );
+      MyClass.useify.functions.all.should.be.an.instanceof( Array ).and.have.a.lengthOf( 2 );
 
+      myClass.execute();
+
+    } );
+
+    it( "should use more than one middleware key", function ( _done ) {
+
+      var MyClass = function () {
+
+        this.name = "";
+
+      };
+
+      MyClass.prototype.execute = function () {
+
+        var self = this;
+
+        self.middleware( "start", function () {
+
+          self.middleware( "all", function () {
+
+            self.middleware( "end", function () {
+
+              self.name = "David";
+              _done();
+
+            } );
+
+          } );
+
+        } );
+
+      };
+
+      Useify( MyClass );
+
+      MyClass.use( "end", function ( _next ) {
+        this.name += "i";
+        _next();
+      } );
+
+      MyClass.use( "end", function ( _next ) {
+        this.name += "d";
+        _next();
+      } );
+
+      MyClass.use( function ( _next ) {
+        this.name += "a";
+        _next();
+      } );
+
+      MyClass.use( function ( _next ) {
+        this.name += "v";
+        _next();
+      } );
+
+      MyClass.use( "start", function ( _next ) {
+        this.name += "D";
+        _next();
+      } );
+
+      var myClass = new MyClass();
       myClass.execute();
 
     } );

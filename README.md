@@ -62,22 +62,6 @@ Add `Useify` to an object
 
 Adds a middleware function to the queue. A dynamic amount of params can be passed from the previous middleware function. The callback must be the last paramater. `use` is chainable.
 
-### object.use.run([params...], [fn])
+### object.middleware([params...], [fn])
 
 Runs the queue of middleware functions in the order they were added. A dynamic amount of params can be passed from the previous middleware function. The callback must be the last paramater.
-
-### object.use.clear()
-
-Clears the queue of middleware functions. Suguar for ...
-
-```javascript
-object.use.functions = [];
-```
-
-### object.use.functions
-
-A reference to the array of functions.
-
-### object.use.obj
-
-A reference to the context object.

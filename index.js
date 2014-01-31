@@ -82,6 +82,8 @@ module.exports = function ( _objectOrFunction ) {
       return this;
     };
 
+    _objectOrFunction.useify = useify;
+
   }
 
 };

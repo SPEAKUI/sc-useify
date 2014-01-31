@@ -356,6 +356,8 @@ describe( "sg-useify", function () {
         isTrue: true
       } );
 
+      MyClass.useify.functions.should.be.an.instanceof( Array ).and.have.a.lengthOf( 2 );
+
       myClass.execute();
 
     } );

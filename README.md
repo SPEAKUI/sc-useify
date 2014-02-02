@@ -9,15 +9,33 @@
 // var Useify = require( "Useify" ),
 //   should = require( "should" );
 
-var myClass = {
-  value: 0
+var MyClass = function () {
+  this.hasInitialised = false;
+  this.value = 0;
+}
+
+MyClass.prototype.init = function () {
+  this.hasInitialised = true;
+  this.middleware( "postInit", function () {
+    this.execute();
+  } );
 };
 
+MyClass.prototype.execute = function () {
+  this.middleware( 1, 2, function ( _sum ) {
+
+    this.hasInitialised.should.be.true;
+    should( _sum ).equal( 22 );
+    _done();
+
+  } );
+}
+
 // `Useify` the class
-Useify( myClass );
+Useify( MyClass );
 
 // Adds the first middleware function.
-myClass.use( function ( _one, _two, _next ) {
+MyClass.use( function ( _one, _two, _next ) {
 
   // The context `this` is a reference to the context class. In this example it is `myClass`
   var aValue = myClass.value + _one + _two;
@@ -31,7 +49,7 @@ myClass.use( function ( _one, _two, _next ) {
 // Adds the second middleware function. Note that the first argument is the paramater from the
 // previous middleware function. The last argument should always be the callback to the next
 // middleware function.
-myClass.use( function ( _three, _next ) {
+MyClass.use( function ( _three, _next ) {
 
   _next( _three, 4 );
 
@@ -41,14 +59,21 @@ myClass.use( function ( _three, _next ) {
 
 } );
 
-// Runs the middleware queue of functions. The last argument of `run` is a callback that is 
-// triggered after the queue is emptied.
-myClass.middleware( 1, 2, function ( _sum ) {
+// This is a named middleware function. By default, middleware functions are named "all". This
+// will give you the ability to add multiple middlware injection points.
+MyClass.use( "postInit", function ( _next ) {
 
-  should( _sum ).equal( 12 );
-  _done();
+  this.value = 10;
+  _next();
 
 } );
+
+// Runs the middleware queue of functions. The last argument of `run` is a callback that is 
+// triggered after the queue is emptied.
+
+var myClass = new MyClass();
+
+myClass.init();
 ```
 
 ## API

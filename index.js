@@ -1,15 +1,17 @@
 var is = require( "sc-is" ),
-  config = require( "./config.json" )
+  config = require( "./config.json" ),
   noop = function () {};
 
 var useifyFunction = function ( functions, key, fn ) {
-  if ( is.not.an.array( functions[ key ] ) ) {
-    functions[ key ] = [];
+  if ( is.not.empty( key ) && is.a.string( key ) ) {
+    if ( is.not.an.array( functions[ key ] ) ) {
+      functions[ key ] = [];
+    }
+    if ( is.a.func( fn ) ) {
+      functions[ key ].push( fn );
+    }
+    return functions[ key ];
   }
-  if ( is.a.func( fn ) ) {
-    functions[ key ].push( fn );
-  }
-  return functions[ key ];
 }
 
 var Useify = function () {
@@ -32,7 +34,7 @@ Useify.prototype.run = function () {
   var self = this,
     currentFunction = 0,
     args = Array.prototype.slice.call( arguments ),
-    middlewareKey = self.functions[ args[ 0 ] ] ? args.shift() : config.defaults.middlewareKey
+    middlewareKey = self.functions[ args[ 0 ] ] ? args.shift() : config.defaults.middlewareKey,
     callback = args[ args.length - 1 ];
 
   callback = is.a.func( callback ) ? args.pop() : noop;

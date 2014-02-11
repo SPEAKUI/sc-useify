@@ -4,6 +4,7 @@
   "description": "`Useify` is a middleware implementation that extends objects",
   "main": "index.js",
   "scripts": {
+    "prepublish": "npm test",
     "test": "./node_modules/.bin/mocha"
   },
   "author": "David Tsuji",

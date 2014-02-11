@@ -29,15 +29,15 @@ Useify.prototype.use = function () {
   useifyFunction( self.functions, key, fn );
 };
 
-Useify.prototype.run = function () {
+Useify.prototype.middleware = function () {
 
   var self = this,
     currentFunction = 0,
     args = Array.prototype.slice.call( arguments ),
-    middlewareKey = self.functions[ args[ 0 ] ] ? args.shift() : config.defaults.middlewareKey,
-    callback = args[ args.length - 1 ];
+    middlewareKey = is.a.string( args[ 0 ] ) && is.a.func( args[ 1 ] ) ? args.shift() : config.defaults.middlewareKey,
+    callback = is.a.func( args[ 0 ] ) ? args.shift() : noop;
 
-  callback = is.a.func( callback ) ? args.pop() : noop;
+  useifyFunction( self.functions, middlewareKey );
 
   var next = function () {
     var fn = self.functions[ middlewareKey ][ currentFunction++ ],
@@ -77,7 +77,7 @@ module.exports = function ( _objectOrFunction ) {
 
       "middleware": {
         value: function () {
-          useify.run.apply( useify, arguments );
+          useify.middleware.apply( useify, arguments );
         }
       },
 
@@ -93,7 +93,7 @@ module.exports = function ( _objectOrFunction ) {
 
     _objectOrFunction.prototype.middleware = function () {
       useify.context = this;
-      useify.run.apply( useify, arguments );
+      useify.middleware.apply( useify, arguments );
     };
 
     _objectOrFunction.use = function () {

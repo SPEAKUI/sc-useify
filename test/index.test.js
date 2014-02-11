@@ -1,4 +1,5 @@
 var should = require( "should" ),
+  async = require( "async" ),
   Useify = require( ".." );
 
 describe( "sg-useify", function () {
@@ -425,6 +426,77 @@ describe( "sg-useify", function () {
 
   } );
 
+  it( "should handle different variations of existing and missing middleware functions", function ( _done ) {
+
+    async.waterfall( [
+
+      function ( _callback ) {
+
+        var MyClass = function () {};
+
+        Useify( MyClass );
+
+        var myClass = new MyClass();
+
+        myClass.middleware( "chicken", function () {
+
+          arguments.should.have.a.lengthOf( 0 );
+          _callback();
+
+        } );
+
+      },
+
+      function ( _callback ) {
+
+        var MyClass = function () {};
+
+        Useify( MyClass );
+
+        var myClass = new MyClass();
+
+        MyClass.use( "chicken", function ( _anArg, _next ) {
+
+          _next();
+
+        } );
+
+        myClass.middleware( "chicken", function () {
+
+          arguments.should.have.a.lengthOf( 0 );
+          _callback();
+
+        }, "wat" );
+
+      },
+
+      function ( _callback ) {
+
+        var MyClass = function () {};
+
+        Useify( MyClass );
+
+        var myClass = new MyClass();
+
+        MyClass.use( "chicken", function ( _anArg, _next ) {
+
+        } );
+
+        myClass.middleware( function () {
+
+          arguments.should.have.a.lengthOf( 1 );
+          _callback();
+
+        }, "wat" );
+
+      }
+
+    ], function ( _error ) {
+      _done( _error );
+    } );
+
+  } );
+
   it( "should test the readme example", function ( _done ) {
 
     // var Useify = require( "Useify" ),
@@ -443,13 +515,13 @@ describe( "sg-useify", function () {
     };
 
     MyClass.prototype.execute = function () {
-      this.middleware( 1, 2, function ( _sum ) {
+      this.middleware( function ( _sum ) {
 
         this.hasInitialised.should.be.true;
         should( _sum ).equal( 22 );
         _done();
 
-      } );
+      }, 1, 2 );
     }
 
     // `Useify` the class
@@ -481,7 +553,7 @@ describe( "sg-useify", function () {
     } );
 
     // This is a named middleware function. By default, middleware functions are named "all". This
-    // will give you the ability to add multiple middlware injection points.
+    // will give you the ability to add multiple middleware injection points.
     MyClass.use( "postInit", function ( _next ) {
 
       this.value = 10;

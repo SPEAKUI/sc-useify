@@ -22,13 +22,13 @@ MyClass.prototype.init = function () {
 };
 
 MyClass.prototype.execute = function () {
-  this.middleware( 1, 2, function ( _sum ) {
+  this.middleware( function ( _sum ) {
 
     this.hasInitialised.should.be.true;
     should( _sum ).equal( 22 );
     _done();
 
-  } );
+  }, 1, 2 );
 }
 
 // `Useify` the class
@@ -60,7 +60,7 @@ MyClass.use( function ( _three, _next ) {
 } );
 
 // This is a named middleware function. By default, middleware functions are named "all". This
-// will give you the ability to add multiple middlware injection points.
+// will give you the ability to add multiple middleware injection points.
 MyClass.use( "postInit", function ( _next ) {
 
   this.value = 10;

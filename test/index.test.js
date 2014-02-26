@@ -232,17 +232,42 @@ describe( "sg-useify", function () {
 
     } );
 
-    it( "should be able to clear the queue", function () {
+    it( "should be able to clear the middleware functions", function () {
 
-      var aClass = {};
+      var class1 = {};
 
-      Useify( aClass );
+      Useify( class1 );
 
-      aClass.use( function () {} ).use( function () {} ).use( function () {} );
+      class1.use( function () {} ).use( function () {} ).use( function () {} );
 
-      aClass.useify.functions.all.should.have.a.lengthOf( 3 );
-      aClass.useify.clear();
-      aClass.useify.functions.all.should.have.a.lengthOf( 0 );
+      class1.useify.functions.all.should.have.a.lengthOf( 3 );
+      class1.useify.clear();
+      class1.useify.functions.all.should.have.a.lengthOf( 0 );
+
+      var class2 = function () {};
+
+      Useify( class2 );
+
+      class2.use( function () {} ).use( function () {} );
+      class2.use( "one", function () {} );
+      class2.use( "two", function () {} );
+      class2.use( "two", function () {} );
+
+      class2.useify.functions.all.should.have.a.lengthOf( 2 );
+      class2.useify.functions.one.should.have.a.lengthOf( 1 );
+      class2.useify.functions.two.should.have.a.lengthOf( 2 );
+
+      class2.useify.clear( "two" );
+
+      class2.useify.functions.all.should.have.a.lengthOf( 2 );
+      class2.useify.functions.one.should.have.a.lengthOf( 1 );
+      class2.useify.functions.two.should.have.a.lengthOf( 0 );
+
+      class2.useify.clear();
+
+      class2.useify.functions.all.should.have.a.lengthOf( 0 );
+      class2.useify.functions.should.not.have.a.property( "one" );
+      class2.useify.functions.should.not.have.a.property( "two" );
 
     } );
 

@@ -57,7 +57,13 @@ Useify.prototype.middleware = function () {
 };
 
 Useify.prototype.clear = function ( middlewareKey ) {
-  this.functions[ middlewareKey || config.defaults.middlewareKey ] = [];
+  if ( is.a.string( middlewareKey ) && is.not.empty( middlewareKey ) ) {
+    this.functions[ middlewareKey ] = [];
+  } else {
+    this.functions = {
+      all: []
+    };
+  }
 };
 
 module.exports = function ( _objectOrFunction ) {

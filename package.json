@@ -1,6 +1,6 @@
 {
   "name": "sc-useify",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "`Useify` is a middleware implementation that extends objects",
   "main": "index.js",
   "scripts": {
